@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pusher Test</title>
     <script src="https://js.pusher.com/7.0/pusher.min.js"></script>
+
+    <div id="messagebox"></div>
     <script>
         // Enable Pusher logging - don't include this in production
         Pusher.logToConsole = true;
@@ -19,11 +21,22 @@
         var channel = pusher.subscribe(uniqueref);
         channel.bind('new-message', function(data) {
           var messageContainer = document.getElementById('messages');
+          
+          // Clear existing messages to prevent duplication
+          messageContainer.innerHTML = '<h2>Messages</h2>';
+          
+          // Add the new message
           var messageElement = document.createElement('div');
           messageElement.textContent = `New Message: ${data.message}`;
           messageContainer.appendChild(messageElement);
 
-          // Also log all messages to display the entire conversation
+          // Map and display all messages from the data
+          data.all_messages.forEach(msg => {
+                var messageElement = document.createElement('div');
+                messageElement.textContent = `Message: ${msg.message}, Timestamp: ${msg.timestamp}`;
+                messageContainer.appendChild(messageElement);
+            });
+
           console.log("All Messages: ", data.all_messages);
         });
 
@@ -43,6 +56,11 @@
             const response = await fetch(`https://bsjobapi.vercel.app/send-message/${uniqueref}/`);
             const data = await response.json();
             const messageContainer = document.getElementById('messages');
+            
+            // Clear the container to avoid duplication
+            messageContainer.innerHTML = '<h2>Messages</h2>';
+            
+            // Map and display all fetched messages
             data.all_messages.forEach(msg => {
                 var messageElement = document.createElement('div');
                 messageElement.textContent = `Message: ${msg.message}, Timestamp: ${msg.timestamp}`;
